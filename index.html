@@ -1064,6 +1064,20 @@ function App() {
     setLastAutoText('');
   };
 
+  const resetForNextStudent = () => {
+    // Clear the entire working screen, but do NOT delete anything from Google Sheets.
+    setRevisionStage('一改');
+    setSelectedFormClass('');
+    setStudent({class:'',mtl:'',name:''});
+    setCurrentExaminer('');
+    setScores({content:'',language:''});
+    setScoreTouched({content:false,language:false});
+    setSelections({content:null,language:null});
+    setFeedbackText('');
+    setLastAutoText('');
+    setSubmitStatus('idle');
+  };
+
   const handleSelect = (category,itemIndex,score) => {
     setSelections(prev=>({...prev,[category]:itemIndex}));
     setScores(prev=>({...prev,[category]:score}));
@@ -1304,7 +1318,7 @@ function App() {
         <h3 className="font-black text-xl md:text-2xl mb-4">📝 综合评估评语预览</h3>
         <textarea value={feedbackText} onChange={e=>setFeedbackText(e.target.value)} className="w-full h-48 p-6 rounded-2xl border-2 border-blue-200 text-lg leading-relaxed" />
         <div className="flex flex-col md:flex-row justify-between gap-4 mt-7 pt-6 border-t">
-          <button onClick={()=>setDialog({isOpen:true,title:'确认清空',message:'确定要清空当前分数，准备给下一位学生打分吗？',type:'confirm',onConfirm:clearScores})} className="px-6 py-3 rounded-xl bg-white border-2 font-bold">🔄 清空重置</button>
+          <button onClick={()=>setDialog({isOpen:true,title:'确认清空',message:'确定要清空当前画面，准备给下一位学生打分吗？\n\n已提交到 Google Sheet 的记录不会被删除。',type:'confirm',onConfirm:resetForNextStudent})} className="px-6 py-3 rounded-xl bg-white border-2 font-bold">🔄 清空重置</button>
           <div className="flex gap-3">
             <button onClick={handlePrint} className="px-6 py-3 rounded-xl bg-white border-2 font-bold">🖨️ 打印/保存 PDF</button>
             <button onClick={()=>handleSubmitGAS(false)} disabled={submitStatus==='loading'} className="px-8 py-3 rounded-xl bg-indigo-600 text-white font-black shadow">{submitStatus==='loading'?'☁️ 提交中...':'☁️ 提交云端表格'}</button>
