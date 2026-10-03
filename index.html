@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雅德小学四年级华文写作</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+@media print {
+  body { background:white; font-size:14pt; }
+  .no-print { display:none !important; }
+  .print-only { display:block !important; }
+  .print-container { border:2px solid #3b82f6; border-radius:16px; padding:42px; margin:20px; box-shadow:none; }
+}
+.print-only { display:none; }
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+</style>
+</head>
+<body class="bg-yellow-50 text-slate-900 font-sans min-h-screen pb-24 text-base">
+<div id="root"><div style="max-width:760px;margin:80px auto;padding:28px;font-family:Arial,sans-serif;background:white;border:1px solid #ddd;border-radius:16px"><b>Loading P4 EYE CL Paper 1…</b><br><span style="color:#666">If this message remains, refresh the page once.</span></div></div>
+<script type="text/babel">
+const {useState,useEffect,useMemo} = React;
+
+/*
+  IMPORTANT:
+  1) After deploying Code.gs as a Web App, paste the /exec URL into GAS_URL below.
+  2) Replace ACCESS_PASSWORD with the SAME password you use for your P4 Oral app.
+     It is intentionally not copied into this file automatically.
+*/
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4TibhNuMjIX2ajFMXiSDQJ_wPcuebPRBcPVMK9sPrEfP0O7YS93TonYU1zl657mLc/exec';
+const ACCESS_PASSWORD = 'Alps2026';
+
+const writingRubrics = {
+  content: {
+    title: "内容",
+    max: 7,
+    items: [
+      { level: 1, scores: [7], label: "层级1（7）", desc: "内容充实；内容切合题旨；内容清楚、有条理", feedback: "内容充实，切合题旨，叙述清楚而且有条理。" },
+      { level: 2, scores: [5,6], label: "层级2（5-6）", desc: "内容相当充实；内容绝大部分切合题旨；内容相当清楚、相当有条理", feedback: "内容相当充实，绝大部分切合题旨，整体相当清楚、有条理。" },
+      { level: 3, scores: [3,4], label: "层级3（3-4）", desc: "内容不足；内容还算切合题旨；内容层次不甚清楚、不太有条理", feedback: "内容还算切合题旨，但内容不足，层次和条理需要进一步加强。" },
+      { level: 4, scores: [1,2], label: "层级4（1-2）", desc: "内容非常不足；内容不切合题旨；内容杂乱无章", feedback: "内容非常不足，与题旨有较大距离，需要把内容写得更完整、更有条理。" }
+    ]
+  },
+  language: {
+    title: "语文表达",
+    max: 8,
+    items: [
+      { level: 1, scores: [7,8], label: "层级1（7-8）", desc: "汉字的书写及标点的运用正确，如有错误，也是极少的；句式多样化，而且正确；用词适当；段落分明", feedback: "汉字和标点掌握良好，句式多样而正确，用词适当，段落分明。" },
+      { level: 2, scores: [5,6], label: "层级2（5-6）", desc: "汉字的书写及标点的运用有些错误；句式有些变化，而且基本上正确；用词还算适当；段落还算分明", feedback: "语文表达整体不错，句式有变化而且基本正确；注意检查汉字和标点，使表达更准确。" },
+      { level: 3, scores: [3,4], label: "层级3（3-4）", desc: "汉字的书写及标点的运用有不少错误；句式变化少，而且有些错误；用词不甚适当；段落不甚分明", feedback: "语文表达仍需加强，注意汉字、标点、句式和用词，并把段落写得更分明。" },
+      { level: 4, scores: [1,2], label: "层级4（1-2）", desc: "汉字的书写及标点的运用有很多错误；句子结构不完整；用词不当；段落不分明", feedback: "语文表达需要进一步加强，尤其要注意完整句子、恰当用词、汉字标点和段落安排。" }
+    ]
+  }
+};
+const examinersList = [
+    "CHEN JINGJING",
+    "CHIA AI TIAN",
+    "CHONG SHI YAN",
+    "DONG JINGJING",
+    "FOO SIEW YEE",
+    "HAO XIAOXING",
+    "HU YULAN",
+    "HUANG YAO TIAN",
+    "LIM LEE CHOON",
+    "LIN YUSHI",
+    "PENG YUANZHEN",
+    "POH YEU PEI",
+    "SU WAN JU",
+    "TAN HUI JUAI",
+    "TEY SIEW LENG",
+    "YEO WEE KIANG",
+    "ZHENG LIDAN"
+];
+const p4Roster = [
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL1",
+        "name": "CHEONG KE YANG"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL1",
+        "name": "JAYLEN CHNG JUN XIONG"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL1",
+        "name": "LEE HAO RUI RAYDER"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL1",
+        "name": "ONG JUN KAI, JAYEN"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL1",
+        "name": "SOH YU FAN, BRAYDEN"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL1",
+        "name": "TREATIC HO"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL1",
+        "name": "CHIAM HAN XIANG LUCAS"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL1",
+        "name": "CHUA SIANG U ZACHARY"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL1",
+        "name": "DEBBIE ANG YU MAN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL1",
+        "name": "GABRIEL TAN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL1",
+        "name": "JAYDEN ONG YOU WEN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL1",
+        "name": "KELLY CHANG KAI LI"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL1",
+        "name": "DARSHAN RAJAN NARWANI"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL1",
+        "name": "ELYSSA CHOE SHI EN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL1",
+        "name": "TAN BO HAN, HAROLD"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL1",
+        "name": "VENETIA WONG JING QI"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL1",
+        "name": "WEE YIN REN MARC"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL1",
+        "name": "WOO JIA JUN COBY"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "CATHERINE MARIE HARYANTO"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "CHEONG MING FENG AUGUSTINE"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "CHLOE LIM JIAYI"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "DAYNA HENG ZI YAN"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "KIARA MABELLE SUHARDJO"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "KIM RA ON"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "KIU CHEN LING KAYLA"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "LIM JUN HUI"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "LIN HSIAN YEE LOIS"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "LOUIS JIA-LE CROGUENNEC"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "OLIVIA TEO"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "ONG REI XIANG"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "RAPHAEL PANG TIAN LE"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "REHAN ANTONIN DVORAK-GHOSH"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "SIM YU QI"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "TAI QI YING, AVELYN"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "TOO JIA WEN JESLYN"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "WOO HEI MAN RENEE"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL2",
+        "name": "YANG ZIXUAN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL2",
+        "name": "HAN QIAOXIN ELIZA"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL2",
+        "name": "KOH TIANJUN HUGO"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL2",
+        "name": "NATASHA GAN ZI QI"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL2",
+        "name": "SOH E XIN KRISTAN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL2",
+        "name": "TAI XUAN YING, ALINA"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL2",
+        "name": "CHAN WAN-ENG AMABELLE"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL2",
+        "name": "EUEN TOH KIT CHUNG (DU JIECONG)"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL2",
+        "name": "HUANG JINGXI"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL2",
+        "name": "KOONG JIE LE CONOR"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL2",
+        "name": "LEONG YIN KWAN"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL2",
+        "name": "LIM JINGJIE"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL2",
+        "name": "LIM KAI EN ASHER"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL2",
+        "name": "LOH SHI NING, CHLOE"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL2",
+        "name": "OH YU CHEN, TAVIS"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL3",
+        "name": "INES YING HUI JOHNSON"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL3",
+        "name": "LEE JIA YI"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL3",
+        "name": "LIM LI YA"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL3",
+        "name": "MATTHIAS TAN JING RUI"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL3",
+        "name": "SUN CHENGYANG"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL3",
+        "name": "YI ZHILIN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "AILSIE CHIN EN QI"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "ALEC AI SHUFAN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "ANG YI XUAN AYLIN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "ANNAMARIA LIN XIYA"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "CHEN SIYU"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "CHOH ZI YANG RYAN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "EMMA TEW YING QING"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "JAYDEN LEE ZHI HONG"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "JESSE ZHANG JUNHAN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "KAYLENE SOO LING JIN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "KIEW DIAN ZHENG, ASHER"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "KOH KAI JUN RAYLEIGH"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "LEIA MIKAELA LOKE"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "LIM SI MIN CADENCE"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "NAOMI LIM XIN XI"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "NATHAN LIM ZI AN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "NG JUN CHANG GARRETT"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "NG ROU EN, ERICIA"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "OLIVIA XINYU WADE"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "REEYA PRABHURAM"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "TAN HONG RUI"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "WONG ZI XUAN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "YONG ETHAN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "ZELENE HO"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL3",
+        "name": "ZHUANG MOYE"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL3",
+        "name": "CHAN WAI SHUEN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL3",
+        "name": "CHUA MING JOON, OWEN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL3",
+        "name": "CODY SIM JUNPENG"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL3",
+        "name": "HUANG CHENGXI"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL3",
+        "name": "LIM JING YING"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL3",
+        "name": "LUTHER GOH ZHENG XUAN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL3",
+        "name": "TAN SZE LING SCARLETT"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL3",
+        "name": "YU MING FENG EVAN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL4",
+        "name": "ANG XUAN KID"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL4",
+        "name": "ISABELLE POON XUE ER"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL4",
+        "name": "KARA BETH LAI"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL4",
+        "name": "WANG YOUYI"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "CHANG HAO YU, GASPAR"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "CHARLES YE YANRAN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "DARIUS CHUA KAI FENG"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "DEON SANTOSO"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "ELYSSA THEA LUHUR"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "IAN LIM JUN XIAN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "JANELLE CHAN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "JEREMIAH TAN KAI LE"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "KAI LINDEMANN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "KOH EN YI ALEXA"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "LEONG KAI HONG, ETHAN"
+    },
+    {
+        "formClass": "P4-O",
+        "mtClass": "4CL4",
+        "name": "MEGAN LIM JING XUAN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "ADEN TAN KAI ZE"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "CHIA XIN TONG JASLYN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "HOW ELIN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "JOHANN TANG YI XIAN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "JUNIUS-JAY LOH YI RUI"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "LIM JIA LE, SHAUN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "LIM ZI QIN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "RAE LYNN KHOO"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "SOFIA WEASLEY"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "SU SHIYA"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "TAN JIA XUAN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "TAN LE XUAN, ALYSSA"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "THAM JIE YI, KYAN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "WONG QI YANG"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "WONG SHI HAN, CHLOE"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL4",
+        "name": "YEO ZONG XUN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "ANG JUN RONG"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "ANNA LEE SI EN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "HO ZUNG HOI, THADDEUS"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "HUANG YIYANG"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "LEE XIN TING CELINE"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "LEW SHAN MIN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "NAOMI KAN WEI EN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "NEO HWEE ZEN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "OLIVER LOH HONG KAI"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "SU RUINING"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "SZE YI HAN"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "TING YU AN CAEDMON"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL5",
+        "name": "YUE KAIQI"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "ALEX CHUA YI FENG"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "ARIELLA ARIFIN"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "CHEN XINRAN"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "CHIU JING YU KODY"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "CHUA JIA YING OLIVIA"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "ENYEA TEO EN RUI"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "HONG ZI XUAN, ELLIE"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "KWAN YU EN EMMA"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "LAU JIE KAI"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "LEE HOU MING"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "LEIA TAM TZE MIN"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "LOW YI LE ETHAN"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "NG JIN RUI DARIUS"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "OW KAI XUAN, ANDREA"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "PHANG ZI RUI"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "SEE YI LING"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "TAN JIA HUAN LYDIA"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "TAN YU XI MATILDA"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "TER JOO EE"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "TONG PEI YI CLARE"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "WONG MIN EN, MIKAYLA"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "YEO YU KAI ALDRICH"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL5",
+        "name": "YEW YU HAN CHARLOTTE"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL6",
+        "name": "ALOYSIUS ONG KAI SHENG"
+    },
+    {
+        "formClass": "P4-E",
+        "mtClass": "4CL6",
+        "name": "NICOLAS LIM YUAN HE"
+    },
+    {
+        "formClass": "P4-H",
+        "mtClass": "4CL6",
+        "name": "SIENNA WEE SHI EN"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL6",
+        "name": "NATHANIA OEY"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL6",
+        "name": "TIO WEN LE"
+    },
+    {
+        "formClass": "P4-I",
+        "mtClass": "4CL6",
+        "name": "YANG XIANZHI HOWARD"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL6",
+        "name": "ALEXANDER LEE YE JUN"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL6",
+        "name": "CHEE YU ZHI"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL6",
+        "name": "CHOI KIAN YONG"
+    },
+    {
+        "formClass": "P4-RS",
+        "mtClass": "4CL6",
+        "name": "THONG JIEMING JAVEN"
+    }
+];
+
+const getBandLevel = (category, score) => {
+  const n = Number(score);
+  const item = writingRubrics[category].items.find(x => x.scores.includes(n));
+  return item ? item.level : null;
+};
+
+function calculateFinalDecision(first, second) {
+  if (!first || !second) return null;
+
+  const diff = Math.abs(Number(first.score) - Number(second.score));
+  const sameContentBand =
+    getBandLevel('content', first.content) === getBandLevel('content', second.content);
+  const sameLanguageBand =
+    getBandLevel('language', first.language) === getBandLevel('language', second.language);
+
+  const useFirst = diff <= 2 && sameContentBand && sameLanguageBand;
+  const chosen = useFirst ? first : second;
+
+  let reason = '';
+  if (useFirst) {
+    reason = '总分差距在2分以内，各分项等级一致 → 采用一改';
+  } else if (diff > 2) {
+    reason = '总分差距超过2分 → 采用二改';
+  } else {
+    const reasons = [];
+    if (!sameContentBand) reasons.push('内容等级不同');
+    if (!sameLanguageBand) reasons.push('表达等级不同');
+    reason = reasons.join('、') + ' → 采用二改';
+  }
+
+  return {
+    stage: useFirst ? '一改' : '二改',
+    score: Number(chosen.score),
+    content: Number(chosen.content),
+    language: Number(chosen.language),
+    marker: chosen.marker || '',
+    reason: reason
+  };
+}
+
+function PasswordGate({onUnlock}) {
+  const [pw,setPw] = useState('');
+  const [error,setError] = useState('');
+  const submit = (e) => {
+    e.preventDefault();
+    if (pw === ACCESS_PASSWORD) {
+      onUnlock();
+    } else {
+      setError('密码不正确，请重试。');
+      setPw('');
+    }
+  };
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+      <form onSubmit={submit} className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200 p-8">
+        <div className="text-center mb-7">
+          <div className="text-5xl mb-3">🔒</div>
+          <h1 className="text-2xl font-black text-slate-900">雅德小学四年级华文写作</h1>
+          <p className="text-slate-500 mt-2">请输入密码进入评分系统</p>
+        </div>
+        <input type="password" value={pw} onChange={e=>setPw(e.target.value)} autoFocus
+          className="w-full border-2 border-slate-200 rounded-xl px-4 py-3 text-lg outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+          placeholder="密码" />
+        {error && <div className="text-red-600 font-bold text-sm mt-3">{error}</div>}
+        <button className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl shadow">进入系统</button>
+      </form>
+    </div>
+  );
+}
+
+function App() {
+  const [unlocked,setUnlocked] = useState(false);
+  const [revisionStage,setRevisionStage] = useState('一改');
+  const [selectedFormClass,setSelectedFormClass] = useState('');
+  const [student,setStudent] = useState({class:'',mtl:'',name:''});
+  const [scores,setScores] = useState({content:'',language:''});
+  const [scoreTouched,setScoreTouched] = useState({content:false,language:false});
+  const [selections,setSelections] = useState({content:null,language:null});
+  const [currentExaminer,setCurrentExaminer] = useState('');
+  const [feedbackText,setFeedbackText] = useState('');
+  const [lastAutoText,setLastAutoText] = useState('');
+  const [submitStatus,setSubmitStatus] = useState('idle');
+  const [dialog,setDialog] = useState({isOpen:false,title:'',message:'',type:'alert',onConfirm:null,isSuccess:false});
+  const [history,setHistory] = useState({});
+
+  const maxContent=7, maxLanguage=8, maxTotal=15;
+  const contentTotal = scores.content === '' ? 0 : Number(scores.content);
+  const languageTotal = scores.language === '' ? 0 : Number(scores.language);
+  const grandTotal = contentTotal + languageTotal;
+
+  const availableFormClasses = useMemo(() =>
+    Array.from(new Set(p4Roster.map(s=>s.formClass))).sort(), []);
+
+  const availableMTClasses = useMemo(() => {
+    if(!selectedFormClass) return [];
+    return Array.from(new Set(p4Roster.filter(s=>s.formClass===selectedFormClass).map(s=>s.mtClass))).sort();
+  },[selectedFormClass]);
+
+  const filteredStudents = useMemo(() => {
+    if(!selectedFormClass || !student.mtl) return [];
+    return p4Roster.filter(s=>s.formClass===selectedFormClass && s.mtClass===student.mtl);
+  },[selectedFormClass,student.mtl]);
+
+  const studentKey = student.name ? `${student.class}|${student.mtl}|${student.name}` : '';
+  const currentHistory = history[studentKey] || {};
+  const record1 = currentHistory['一改'];
+  const record2 = currentHistory['二改'];
+  const finalDecision = calculateFinalDecision(record1, record2);
+
+  const loadHistory = async (s) => {
+    if(!s?.name || !GAS_URL.startsWith('https://script.google.com/')) return;
+    try {
+      const u = `${GAS_URL}?action=history&formClass=${encodeURIComponent(s.class)}&mtClass=${encodeURIComponent(s.mtl)}&studentName=${encodeURIComponent(s.name)}&_=${Date.now()}`;
+      const r = await fetch(u,{cache:'no-store'});
+      const d = await r.json();
+      if(d && d.ok) {
+        setHistory(prev=>({...prev,[`${s.class}|${s.mtl}|${s.name}`]:d.history||{}}));
+      }
+    } catch(e) {}
+  };
+
+  const handleFormClassChange = e => {
+    const fc=e.target.value;
+    setSelectedFormClass(fc);
+    setStudent({class:fc,mtl:'',name:''});
+    clearScores();
+  };
+  const handleMTClassChange = e => {
+    setStudent({class:selectedFormClass,mtl:e.target.value,name:''});
+    clearScores();
+  };
+  const handleStudentSelect = e => {
+    const name=e.target.value;
+    const found=p4Roster.find(s=>s.formClass===selectedFormClass && s.mtClass===student.mtl && s.name===name);
+    const next = found ? {class:found.formClass,mtl:found.mtClass,name:found.name} : {class:selectedFormClass,mtl:student.mtl,name:''};
+    setStudent(next); clearScores(); if(found) loadHistory(next);
+  };
+
+  const clearScores = () => {
+    setScores({content:'',language:''});
+    setScoreTouched({content:false,language:false});
+    setSelections({content:null,language:null});
+    setFeedbackText('');
+    setLastAutoText('');
+  };
+
+  const handleSelect = (category,itemIndex,score) => {
+    setSelections(prev=>({...prev,[category]:itemIndex}));
+    setScores(prev=>({...prev,[category]:score}));
+    setScoreTouched(prev=>({...prev,[category]:true}));
+  };
+
+  const handleScoreChange = (category,value) => {
+    if(value==='') {
+      setScores(prev=>({...prev,[category]:''}));
+      setScoreTouched(prev=>({...prev,[category]:false}));
+      setSelections(prev=>({...prev,[category]:null}));
+      return;
+    }
+    let n=Number(value); if(!Number.isFinite(n)) return;
+    n=Math.max(0,Math.min(writingRubrics[category].max,n));
+    setScores(prev=>({...prev,[category]:n}));
+    setScoreTouched(prev=>({...prev,[category]:true}));
+    const idx=writingRubrics[category].items.findIndex(x=>x.scores.includes(n));
+    setSelections(prev=>({...prev,[category]:idx>=0?idx:null}));
+  };
+
+  const getFeedback = (category,score) => {
+    const item=writingRubrics[category].items.find(x=>x.scores.includes(Number(score)));
+    return item?.feedback || '';
+  };
+  const generatedFeedback = useMemo(() => {
+    const parts=[];
+    if(scoreTouched.content && getFeedback('content',scores.content)) parts.push(`【内容】\n${getFeedback('content',scores.content)}`);
+    if(scoreTouched.language && getFeedback('language',scores.language)) parts.push(`【表达】\n${getFeedback('language',scores.language)}`);
+    return parts.join('\n\n');
+  },[scores.content,scores.language,scoreTouched.content,scoreTouched.language]);
+
+  useEffect(()=>{
+    setFeedbackText(current => {
+      if(!current || current===lastAutoText) return generatedFeedback;
+      if(lastAutoText && current.includes(lastAutoText)) return current.replace(lastAutoText,generatedFeedback);
+      return current;
+    });
+    setLastAutoText(generatedFeedback);
+  },[generatedFeedback]);
+
+  const handleExaminerChange=e=>{
+    setCurrentExaminer(e.target.value);
+  };
+
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const waitForStatus=async requestId=>{
+    for(let i=0;i<30;i++) {
+      const r=await fetch(`${GAS_URL}?action=status&requestId=${encodeURIComponent(requestId)}&_=${Date.now()}`,{cache:'no-store'});
+      const d=await r.json();
+      if(d && d.pending!==true) return d;
+      await sleep(500);
+    }
+    throw new Error('Unable to confirm submission');
+  };
+
+  const handleSubmitGAS=async(forceDuplicate=false)=>{
+    if(!GAS_URL.startsWith('https://script.google.com/')) {
+      setDialog({isOpen:true,title:'尚未连接 Google Sheet',message:'请先部署 Code.gs，然后把 Web App 的 /exec URL 贴入 index.html 的 GAS_URL。',type:'alert'});
+      return;
+    }
+    if(!student.class || !student.mtl || !student.name || !currentExaminer) {
+      setDialog({isOpen:true,title:'⚠️ 资料不完整',message:'请先选择级任班、母语班、学生和评卷老师。',type:'alert'});
+      return;
+    }
+    if(!scoreTouched.content || !scoreTouched.language || scores.content==='' || scores.language==='') {
+      setDialog({isOpen:true,title:'⚠️ 资料不完整',message:'请完成内容和表达的评分后再提交成绩。',type:'alert'});
+      return;
+    }
+    setSubmitStatus('loading');
+    const requestId=`p4w_${Date.now()}_${Math.random().toString(36).slice(2,10)}`;
+    const payload={
+      requestId, level:'P4', assessment:'EYE CL Paper 1',
+      formClass:student.class, mtClass:student.mtl, studentName:student.name,
+      revisionStage, marker:currentExaminer,
+      contentScore:Number(scores.content), languageScore:Number(scores.language),
+      totalScore:grandTotal, maxTotal:15, feedback:feedbackText,
+      contentBand:getBandLevel('content',scores.content),
+      languageBand:getBandLevel('language',scores.language),
+      timestamp:new Date().toLocaleString('zh-CN',{hour12:false}),
+      forceDuplicate
+    };
+    try {
+      await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+      const result=await waitForStatus(requestId);
+      setSubmitStatus('idle');
+      if(result?.duplicate===true && result?.saved===false) {
+        const p=result.previous||{};
+        setDialog({
+          isOpen:true,title:'⚠️ 成绩已经提交',
+          message:`学生：${student.name}\n\n批改阶段：${revisionStage}\n\n这名学生的${revisionStage}成绩已经提交过。\n\n上一次评卷老师：${p.marker||'未记录'}\n\n上一次总分：${p.totalScore??'未记录'}分\n\n是否仍要提交这一次的成绩？`,
+          type:'confirm',confirmText:'继续提交',cancelText:'取消',onConfirm:()=>handleSubmitGAS(true)
+        });
+        return;
+      }
+      if(!result || result.ok!==true || result.saved!==true) throw new Error(result?.error||'Not confirmed');
+      setHistory(prev=>({
+        ...prev,[studentKey]:{...(prev[studentKey]||{}),[revisionStage]:{score:grandTotal,content:contentTotal,language:languageTotal,marker:currentExaminer}}
+      }));
+      setDialog({isOpen:true,title:'✅ 提交成功！',message:`学生 ${student.name} 的 (${revisionStage}) 写作成绩已保存。\n评卷老师：${currentExaminer}`,type:'alert',isSuccess:true});
+    } catch(e) {
+      setSubmitStatus('idle');
+      setDialog({isOpen:true,title:'提交状态未确认',message:'系统暂时无法确认这次提交的状态。请先查看 Google Sheet 是否已有新记录，再决定是否重试，以免重复提交。',type:'alert'});
+    }
+  };
+
+  const handlePrint=()=>{
+    const old=document.title;
+    document.title=student.name?`${student.class}_${student.name}_四年级华文写作反馈_${revisionStage}`:'四年级华文写作反馈单';
+    window.print(); setTimeout(()=>document.title=old,500);
+  };
+
+  const renderRubricRow=(categoryKey,rubricObj)=>(
+    <div className="mb-10 bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200 no-print">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h3 className="font-bold text-xl md:text-2xl text-slate-800">{rubricObj.title} <span className="text-slate-400 text-lg font-medium">({rubricObj.max}分)</span></h3>
+        <div className="flex items-center space-x-3 bg-blue-50 px-4 py-2 rounded-xl border border-blue-200">
+          <span className="font-bold text-blue-900">得分:</span>
+          <input type="number" min="0" max={rubricObj.max} value={scores[categoryKey]} onChange={e=>handleScoreChange(categoryKey,e.target.value)}
+            className="w-16 text-center font-black text-2xl text-blue-700 bg-transparent border-b-2 border-blue-300 outline-none"/>
+          <span className="text-slate-500">/{rubricObj.max}</span>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {rubricObj.items.map((item,index)=>{
+          const selected=selections[categoryKey]===index;
+          return <div key={index} className={`rounded-xl p-4 border-2 ${selected?'border-blue-600 bg-blue-50 ring-4 ring-blue-100':'border-slate-200'}`}>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {item.scores.map(s=><button key={s} onClick={()=>handleSelect(categoryKey,index,s)}
+                className={`w-10 h-10 rounded-lg font-black ${selected && Number(scores[categoryKey])===s?'bg-blue-600 text-white':'bg-white border-2 border-slate-300 text-slate-700 hover:bg-blue-100'}`}>{s}</button>)}
+            </div>
+            <div className={`font-black text-lg mb-2 ${selected?'text-blue-800':'text-slate-800'}`}>{item.label}</div>
+            <div className="text-sm leading-relaxed text-slate-600">{item.desc}</div>
+          </div>
+        })}
+      </div>
+    </div>
+  );
+
+  if(!unlocked) return <PasswordGate onUnlock={()=>setUnlocked(true)}/>;
+
+  return <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+    {dialog.isOpen && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4 no-print">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div className={`p-9 ${dialog.isSuccess?'bg-green-50 text-center':''}`}>
+          {dialog.isSuccess && <div className="text-6xl mb-4">🎉</div>}
+          <h3 className="font-black text-2xl mb-3">{dialog.title}</h3>
+          <p className="text-lg text-slate-600 whitespace-pre-line">{dialog.message}</p>
+        </div>
+        <div className="p-5 bg-slate-50 flex gap-3">
+          {dialog.type==='confirm' && <button onClick={()=>setDialog({...dialog,isOpen:false})} className="w-full px-6 py-3 font-bold rounded-xl bg-slate-200">{dialog.cancelText||'取消'}</button>}
+          <button onClick={()=>{const a=dialog.onConfirm;setDialog(p=>({...p,isOpen:false,isSuccess:false}));if(a)a();}}
+            className="w-full px-6 py-3 font-black rounded-xl bg-blue-600 text-white">{dialog.type==='confirm'?(dialog.confirmText||'确定'):'我知道了'}</button>
+        </div>
+      </div>
+    </div>}
+
+    <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl shadow-md border-b border-slate-200 rounded-b-3xl p-4 lg:p-5 mb-8 no-print">
+      <div className="flex flex-col xl:flex-row justify-between gap-4">
+        <div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
+            <span className="text-2xl font-black bg-gradient-to-r from-blue-700 to-indigo-700 bg-clip-text text-transparent">雅德小学四年级华文写作</span>
+            <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+              {['一改','二改'].map(stage=><button key={stage} onClick={()=>setRevisionStage(stage)} className={`px-4 py-1.5 rounded-lg font-bold text-sm ${revisionStage===stage?'bg-blue-600 text-white':'text-slate-500'}`}>{stage==='二改'?'二改 (抽查)':stage}</button>)}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="font-bold text-sm">级任班:
+              <select value={selectedFormClass} onChange={handleFormClassChange} className="ml-1 border-2 rounded-xl px-3 py-2 bg-white">
+                <option value="">- 选择 -</option>{availableFormClasses.map(x=><option key={x}>{x}</option>)}
+              </select>
+            </label>
+            <label className="font-bold text-sm">母语班:
+              <select value={student.mtl} onChange={handleMTClassChange} disabled={!selectedFormClass} className="ml-1 border-2 rounded-xl px-3 py-2 bg-white disabled:bg-slate-100">
+                <option value="">- 选择 -</option>{availableMTClasses.map(x=><option key={x}>{x}</option>)}
+              </select>
+            </label>
+            <label className="font-bold text-sm">学生:
+              <select value={student.name} onChange={handleStudentSelect} disabled={!student.mtl} className="ml-1 w-56 border-2 rounded-xl px-3 py-2 bg-white text-blue-700 disabled:bg-slate-100">
+                <option value="">- 选择 -</option>{filteredStudents.map((s,i)=><option key={i} value={s.name}>{s.name}</option>)}
+              </select>
+            </label>
+            <label className="font-bold text-sm text-purple-700">评卷老师 ({revisionStage}):
+              <select value={currentExaminer} onChange={handleExaminerChange} className="ml-1 border-2 border-purple-200 rounded-xl px-3 py-2 bg-purple-50 text-purple-800">
+                <option value="">- 选择 -</option>{examinersList.map(x=><option key={x}>{x}</option>)}
+              </select>
+            </label>
+          </div>
+        </div>
+        <div className="flex items-center gap-5">
+          <div className="text-center"><div className="text-xs font-bold text-slate-500">内容</div><div className="font-black text-xl text-indigo-600">{contentTotal}<span className="text-sm text-slate-400">/7</span></div></div>
+          <div className="text-center"><div className="text-xs font-bold text-slate-500">表达</div><div className="font-black text-xl text-indigo-600">{languageTotal}<span className="text-sm text-slate-400">/8</span></div></div>
+          <div className="text-center px-6 py-2 rounded-2xl bg-blue-600 text-white shadow"><div className="text-xs font-bold">{revisionStage}得分</div><div className="font-black text-3xl">{grandTotal}<span className="text-sm">/15</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    {student.name && (record1 || record2) && <div className="mb-8 no-print bg-white border-2 border-slate-200 rounded-3xl p-6 shadow-sm">
+      <h4 className="font-black text-lg mb-4">📊 已提交的批改记录 ({student.name})</h4>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+        <div className={finalDecision && finalDecision.stage === '一改' ? 'p-4 rounded-2xl border-2 bg-emerald-50 border-emerald-500 ring-4 ring-emerald-100' : 'p-4 rounded-2xl border-2 bg-slate-50 border-slate-200'}>
+          <div className="text-xs font-bold text-slate-500">一改 ({record1 ? (record1.marker || '未记录') : '未记录'})</div>
+          <div className="text-xl font-black">{record1 ? (record1.content + '+' + record1.language + '=' + record1.score + '分') : '未提交'}</div>
+          {finalDecision && finalDecision.stage === '一改' && <div className="mt-2 inline-block px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-black">✓ 最终采用</div>}
+        </div>
+        <div className={finalDecision && finalDecision.stage === '二改' ? 'p-4 rounded-2xl border-2 bg-emerald-50 border-emerald-500 ring-4 ring-emerald-100' : 'p-4 rounded-2xl border-2 bg-slate-50 border-slate-200'}>
+          <div className="text-xs font-bold text-slate-500">二改 ({record2 ? (record2.marker || '未记录') : '未记录'})</div>
+          <div className="text-xl font-black">{record2 ? (record2.content + '+' + record2.language + '=' + record2.score + '分') : '未提交'}</div>
+          {finalDecision && finalDecision.stage === '二改' && <div className="mt-2 inline-block px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-black">✓ 最终采用</div>}
+        </div>
+      </div>
+      {finalDecision && <div className="mt-5 bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5">
+        <div className="font-black text-emerald-900 text-lg">最终成绩：{finalDecision.score}/15（采用{finalDecision.stage} · {finalDecision.marker}）</div>
+        <div className="text-sm font-bold text-emerald-800 mt-1">内容 {finalDecision.content}/7　表达 {finalDecision.language}/8</div>
+        <div className="text-sm text-emerald-800 mt-2">{finalDecision.reason}</div>
+      </div>}
+    </div>}
+
+    <div className="print-only print-container">
+      <h1 className="text-3xl font-black text-center mb-6">✍️ 雅德小学四年级华文写作反馈单 ✍️</h1>
+      <div className="text-center text-lg mb-8">级任班：<b>{student.class}</b>　母语班：<b>{student.mtl}</b>　学生：<b>{student.name}</b>　评卷老师：<b>{currentExaminer}</b></div>
+      <div className="flex justify-center gap-4 mb-8 text-center">
+        <div className="p-4 border-2 rounded-2xl w-36"><b>内容</b><div className="text-3xl font-black">{contentTotal}/7</div></div>
+        <div className="p-4 border-2 rounded-2xl w-36"><b>表达</b><div className="text-3xl font-black">{languageTotal}/8</div></div>
+        <div className="p-4 border-4 border-emerald-200 bg-emerald-50 rounded-2xl w-40"><b>总分</b><div className="text-4xl font-black text-emerald-800">{grandTotal}/15</div></div>
+      </div>
+      <h2 className="text-xl font-black mb-3">老师评估评语：</h2>
+      <div className="border-2 rounded-2xl p-6 text-lg whitespace-pre-wrap min-h-[150px]">{feedbackText}</div>
+    </div>
+
+    <div className="no-print">
+      <h2 className="text-2xl font-black mb-6 px-4 border-l-8 border-blue-600">第一部分：内容 (7分)</h2>
+      {renderRubricRow('content',writingRubrics.content)}
+      <h2 className="text-2xl font-black mb-6 px-4 border-l-8 border-indigo-600">第二部分：表达 (8分)</h2>
+      {renderRubricRow('language',writingRubrics.language)}
+
+      <div className="mt-12 p-6 md:p-8 rounded-3xl border-2 shadow-sm bg-blue-50/50 border-blue-100">
+        <h3 className="font-black text-xl md:text-2xl mb-4">📝 综合评估评语预览</h3>
+        <textarea value={feedbackText} onChange={e=>setFeedbackText(e.target.value)} className="w-full h-48 p-6 rounded-2xl border-2 border-blue-200 text-lg leading-relaxed" />
+        <div className="flex flex-col md:flex-row justify-between gap-4 mt-7 pt-6 border-t">
+          <button onClick={()=>setDialog({isOpen:true,title:'确认清空',message:'确定要清空当前分数，准备给下一位学生打分吗？',type:'confirm',onConfirm:clearScores})} className="px-6 py-3 rounded-xl bg-white border-2 font-bold">🔄 清空重置</button>
+          <div className="flex gap-3">
+            <button onClick={handlePrint} className="px-6 py-3 rounded-xl bg-white border-2 font-bold">🖨️ 打印/保存 PDF</button>
+            <button onClick={()=>handleSubmitGAS(false)} disabled={submitStatus==='loading'} className="px-8 py-3 rounded-xl bg-indigo-600 text-white font-black shadow">{submitStatus==='loading'?'☁️ 提交中...':'☁️ 提交云端表格'}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
