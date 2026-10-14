@@ -42,7 +42,8 @@ const writingRubrics = {
       { level: 1, scores: [7], label: "层级1（7）", desc: "内容充实；内容切合题旨；内容清楚、有条理", feedback: "内容充实，切合题旨，叙述清楚而且有条理。" },
       { level: 2, scores: [5,6], label: "层级2（5-6）", desc: "内容相当充实；内容绝大部分切合题旨；内容相当清楚、相当有条理", feedback: "内容相当充实，绝大部分切合题旨，整体相当清楚、有条理。" },
       { level: 3, scores: [3,4], label: "层级3（3-4）", desc: "内容不足；内容还算切合题旨；内容层次不甚清楚、不太有条理", feedback: "内容还算切合题旨，但内容不足，层次和条理需要进一步加强。" },
-      { level: 4, scores: [1,2], label: "层级4（1-2）", desc: "内容非常不足；内容不切合题旨；内容杂乱无章", feedback: "内容非常不足，与题旨有较大距离，需要把内容写得更完整、更有条理。" }
+      { level: 4, scores: [1,2], label: "层级4（1-2）", desc: "内容非常不足；内容不切合题旨；内容杂乱无章", feedback: "内容非常不足，与题旨有较大距离，需要把内容写得更完整、更有条理。" },
+       { level: 5, scores: [0], label: "零（0分）", desc: "未作答；没有任何内容。", feedback: "未作答；没有任何内容。" }
     ]
   },
   language: {
@@ -52,7 +53,8 @@ const writingRubrics = {
       { level: 1, scores: [7,8], label: "层级1（7-8）", desc: "汉字的书写及标点的运用正确，如有错误，也是极少的；句式多样化，而且正确；用词适当；段落分明", feedback: "汉字和标点掌握良好，句式多样而正确，用词适当，段落分明。" },
       { level: 2, scores: [5,6], label: "层级2（5-6）", desc: "汉字的书写及标点的运用有些错误；句式有些变化，而且基本上正确；用词还算适当；段落还算分明", feedback: "语文表达整体不错，句式有变化而且基本正确；注意检查汉字和标点，使表达更准确。" },
       { level: 3, scores: [3,4], label: "层级3（3-4）", desc: "汉字的书写及标点的运用有不少错误；句式变化少，而且有些错误；用词不甚适当；段落不甚分明", feedback: "语文表达仍需加强，注意汉字、标点、句式和用词，并把段落写得更分明。" },
-      { level: 4, scores: [1,2], label: "层级4（1-2）", desc: "汉字的书写及标点的运用有很多错误；句子结构不完整；用词不当；段落不分明", feedback: "语文表达需要进一步加强，尤其要注意完整句子、恰当用词、汉字标点和段落安排。" }
+      { level: 4, scores: [1,2], label: "层级4（1-2）", desc: "汉字的书写及标点的运用有很多错误；句子结构不完整；用词不当；段落不分明", feedback: "语文表达需要进一步加强，尤其要注意完整句子、恰当用词、汉字标点和段落安排。" },
+       { level: 5, scores: [0], label: "零（0分）", desc: "未作答；没有任何文字表达。", feedback: "未作答；没有任何文字表达。" }
     ]
   }
 };
@@ -1207,7 +1209,7 @@ function App() {
           <span className="text-slate-500">/{rubricObj.max}</span>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         {rubricObj.items.map((item,index)=>{
           const selected=selections[categoryKey]===index;
           return <div key={index} className={`rounded-xl p-4 border-2 ${selected?'border-blue-600 bg-blue-50 ring-4 ring-blue-100':'border-slate-200'}`}>
